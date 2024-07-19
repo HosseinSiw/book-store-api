@@ -13,17 +13,13 @@ const (
 	DbUser   = "root"
 	DbPass   = "0150112378MySQL"
 	DbName   = "goCrudApp"
+	Shift    = 10
 )
 
-type User struct {
-	id    int
-	Name  string
-	Email string
-}
-
-func CreateUser(db *sql.DB, name string, email string) error {
-	command := "INSERT INTO users values (?, ?)"
-	_, err := db.Exec(command, name, email)
+func CreateUser(db *sql.DB, name string, email string, password string) error {
+	command := "INSERT INTO users values (?, ?, ?)"
+	password = CaesarEncrypt(password, Shift)
+	_, err := db.Exec(command, name, email, password)
 	if err != nil {
 		return err
 	}
@@ -48,7 +44,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("Cannot decode the content into a user type")
 	}
-	err = CreateUser(db, user.Name, user.Email)
+	err = CreateUser(db, user.Name, user.Email, user.Password)
 	if err != nil {
 		log.Fatal("Cannot Create a new user")
 	}
